@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<meta name="viewport" content="width=device-width,user-scalable=no"/>
+	<title>Flappy</title>
+
+	<style>
+		@font-face {
+			font-family : 'myFont'; /* Ваше название шрифта */
+			src : url(font.ttf);    /* Путь к файлу со шрифтом TTF */
+		}
+		@font-face {
+			font-family : 'Segoe'; /* Ваше название шрифта */
+			src : url(segoepr.ttf);    /* Путь к файлу со шрифтом TTF */
+		}
+	</style>
+
+</head>
+<body>
+<script src="https://vk.com/js/api/xd_connection.js?2"  type="text/javascript"></script>
+<script type="text/javascript" src="point.js"></script>
+<script type="text/javascript">
+
+var vk_inited = false;
+
+VK.init(function() {
+	vk_inited = true;
+}, function() {
+
+}, '5.60');
+
+var width = 640, height = 480;
+
+var pjs = new PointJS('2D', width, height);
+pjs.system.initFullScale();
+
+var log = pjs.system.log;
+var game = pjs.game;
+var OOP = pjs.OOP;
+var p = pjs.vector.point;
+var s = pjs.vector.size;
+var brush = pjs.brush;
+var mouse = pjs.mouseControl.initMouseControl();
+
+var words = ['С днем рождения поздравляю\n И желаю день за днем\nБыть счастливее и ярче,\nСловно солнце за окном.\n\nПожелаю я здоровья,\nМного смеха и тепла,\nЧтоб родные были рядом\nИ, конечно же, добра!\n\nПусть деньжат будет побольше,\nПутешествий и любви.\nЧашу полную заботы,\nМира, света, красоты!',
+	    'Поздравляю с днем рождения! Пусть жизнь дарит тебе побольше\nярких моментов и сбудутся все твои самые смелые и заветные желания!\nЖелаю чтобы в твоем доме всегда царили счастье и понимание.\nИ пусть тебя окружают только искренние, верные, надежные друзья и добрые люди.',
+	    'Тебе желаю море счастья,\nУлыбок, солнца и тепла.\nЧтоб жизнь была еще прекрасней,\nУдача за руку вела!\n\nПусть в доме будет только радость,\nУют, достаток и покой.\nДрузья, родные будут рядом,\nБеда обходит стороной!\n\nЗдоровья крепкого желаю\nИ легких жизненных дорог.\nИ пусть всегда, благословляя,\nТебя хранит твой ангелок!',
+	    'Пусть в жизни будет все, что нужно:\nЗдоровье, мир, любовь и дружба.\nНе отвернется пусть успех,\nУдача любит больше всех.\n\nПусть счастье будет настоящим,\nК мечте и радости манящем.\nИ много-много светлых лет\nБез боли, горестей и бед!',
+	    'С днем рожденья поздравляю\nИ от всей души желаю\nРадости, любви, успеха,\nЧтобы повод был для смеха!\n\nПусть что хочется — случится,\nНу а счастье — вечно длится,\nЕсли встретятся невзгоды —\nПусть не сделают погоды!\n\nВ доме пусть царит порядок,\nВ кошельке будет достаток,\nВсего лучшего желаю\nИ еще раз поздравляю!',
+	    'Тебе желаю в день рожденья\nНевероятного везенья,\nЛюбви, здоровья и успеха,\nУлыбок, искреннего смеха,\nВеселья, счастья без предела\nИ бодрости души и тела!\nЗаботы близких, уваженья\nИ всех желаний исполненья!',
+	    'Тебя, Алена, поздравляю,\nЖелаю счастья я в судьбе.\nЖизнь впереди лежит большая,\nОткрыты двери все тебе.\n\nПусть будет жизнь твоя богата,\nВ ней сотни преданных друзей,\nЧтоб разделить с ними могла ты\nДобро на миллион частей.\n\nИ пусть всегда с тобою рядом,\nЗа шагом шаг, любовь идет.\nДругой судьбы тебе не надо,\nВедь счастье за порогом ждет.',
+	    'С праздником тебя, Аленка!\nСмейся весело и звонко,\nКомплименты получай\nИ нисколько не скучай!\n\nАх, какая ты милашка,\nТы у нас очаровашка,\nОставайся же такой —\nСлавной, милой, озорной!',
+	    'Пусть будет у тебя, Алена,\nУспехов, счастья и добра\nНе по чуть-чуть, а сразу тонна,\nЧтобы хватило на года!\n\nПускай друзья улыбки дарят,\nРодные рядышком живут,\nГода летящие не старят,\nА только новых сил дают!',
+	    'Милая Алена, алая заря,\nСолнце утром всходит\nТолько для тебя.\nСвои поздравления\nОно с лучами шлет,\nСчастье и любовь\nВ твою жизнь несет.\nЩедро с тобой светом\nДелится оно,\nЕго сияние в имя\nТвое заключено.\nТебе я пожелаю\nАленушка, светить,\nСчастливой и любимой\nЖелаю в жизни быть.',
+	    'Дорогая Алёнка, поздравляю тебя от чистого сердца.\nЖелаю быть великолепной и неотразимой,\nЖелаю постигать в жизни счастье и удачу,\nЖелаю быть во всём первой и самой лучшей,\n Желаю преуспевать во всех своих делах и идеях,\n Желаю большой любви и несомненного блага.',
+	    'Ты красива, грациозна,\nВ убеждениях — непреклонна.\nТы не женщина, ты — ангел,\nБесподобная Алена.\n\nЯ желаю, чтоб носили\nТебя чаще на руках,\nШубы, золото дарили\nИ селили лишь в дворцах.\n\nБудь всегда такой же яркой,\nНеобычной и хмельной,\nНеожиданной, прекрасной,\nМудрой, стильной, деловой.',
+	    '18, наконец-то!\nПоздравляю от души.\nЯ тебе желаю счастья,\nНо взрослеть ты не спеши.\n\nНасладись прекрасной датой,\nУлыбайся, веселись.\nВ жизни будет пусть всё круто,\nТолько к лучшему стремись.\n\nМоре нежности, удачи,\nВолны страсти, доброты.\nЯ тебе всего желаю,\nВедь всего добьешься ты!',
+	    'Вот тебе и восемнадцать —\nЭто возраст непростой.\nС детством надо попрощаться,\nВзрослый путь наметить свой.\n\nПусть тебе это удастся\nБез каких-либо проблем,\nИ довольно улыбаться\nБудешь ты всегда и всем.\n\nПусть удача тебе будет\nСловно старшая сестра,\nПусть успех тебя полюбит,\nВера укрепит тебя.\n\nА любовь пускай согреет,\nПусть надежда вдаль зовет,\nСчастье крыльями заденет\nИ уж больше не уйдет.',
+	    'Хочу поздравить тебя с твоим восемнадцатилетием.\nВ этот день хочется для тебя пожелать счастья,\nчтобы оно сопутствовало тебе всю дорогу и не покидало ни на шаг.\nПусть рядом с тобой всегда будет надежная опора и поддержка — твои близкие люди и друзья.\n Пусть перед тобой откроются новые жизненные горизонты. Непременно добивайся всего, что было задумано.\nПусть в этом помогает удача и твое упорство. Любви желаю — самой чистой, здоровья — самого крепкого.',
+	    '18 — это дата\nСамая красивая!\nЭто юность, свежесть, нежность,\nМолодость игривая!\n\nЭто планы и надежды,\nЦели и мечтания,\nСмелые и дерзкие\nОт жизни ожидания.\n\nЖелаю много радости,\nУспеха на пути,\nНе падай, не сдавайся,\nВсегда вперед иди.\n\nВсё у тебя получится,\nТы только в это верь.\nУлыбка и настойчивость\nОткроют в счастье дверь!',
+	    'Тебе сегодня восемнадцать!\nПеред тобой открыт весь мир.\nИ чтобы в нём не потеряться,\nТебе на всё пусть хватит сил.\n\nЖелаю стать лишь тем, кем хочешь,\nВо всём достичь больших побед,\nМечты заветные исполнить\nИ в жизни свой оставить след!'];
+
+var photos = ['photo-188442866_457239017',
+	     'photo-188442866_457239018',
+	     'photo-188442866_457239019',
+	     'photo-188442866_457239020',
+	     'photo-188442866_457239021',
+	     'photo-188442866_457239022',
+	     'photo-188442866_457239023',
+	     'photo-188442866_457239024',
+	     'photo-188442866_457239025',
+	     'photo-188442866_457239026',
+	     'photo-188442866_457239027',
+	     'photo-188442866_457239028',
+	     'photo-188442866_457239029',
+	     'photo-188442866_457239030',
+	     'photo-188442866_457239031',
+	     'photo-188442866_457239032',
+	     'photo-188442866_457239033',
+	     'photo-188442866_457239034',
+	     'photo-188442866_457239035'];
+
+var start = game.newTextObject({
+	text : 'Нажми, чтобы начать',
+	positionC : p(width - 160, height - 20),
+	font : 'Segoe',
+	size : 20,
+	color : '#000000'
+});
+	
+var repost = game.newTextObject({
+	text : 'Поздравить звездочку',
+	positionC : p(520, height - 30),
+	font : 'Segoe',
+	size : 15,
+	color : '#FFFFFF'
+});
+var repost2 = game.newTextObject({
+	text : 'с Днем Рождения',
+	positionC : p(520, height - 10),
+	font : 'Segoe',
+	size : 15,
+	color : '#FFFFFF'
+});
+var mainp = game.newImageObject({
+	file : 'maain.png',
+	x : 0, y : 0,
+	scale : 0.445,
+});
+	
+var one = game.newImageObject({
+	file : 'onee.png',
+	x : 20, y : 0,
+	scale : 0.25,
+});
+
+var nextt = game.newTextObject({
+	text : 'Далее',
+	positionC : p(width - 50, height - 15),
+	font : 'Segoe',
+	size : 25,
+	color : 'red'
+});
+	
+var nextt2 = game.newTextObject({
+	text : 'Далее',
+	positionC : p(width - 49, height - 14),
+	font : 'Segoe',
+	size : 25,
+	color : 'white'
+});
+	
+var two = game.newImageObject({
+	file : 'twoo.png',
+	x : 25, y : 0,
+	scale : 0.25,
+});
+	
+var three = game.newImageObject({
+	file : 'three.png',
+	x : 25, y : 0,
+	scale : 0.25,
+});
+	
+var four = game.newImageObject({
+	file : 'four.png',
+	x : 25, y : 0,
+	scale : 0.25,
+});
+	
+var last = game.newImageObject({
+	file : 'lastt.png',
+	x : 0, y : 0,
+	scale : 0.445,
+});
+
+var score = 0;
+
+var level = 1;
+
+var bg1 = [], bg2 = [], bg3 = [], bg4 = [], oldB1, oldB2, oldB3, oldB4;
+OOP.forInt(3, function (i) {
+	
+	oldB1 = game.newImageObject({
+		file : 'level1/bg.gif',
+		h : height,
+		onload : function () {
+			this.x = i * this.w;
+		}
+	});
+	oldB2 = game.newImageObject({
+		file : 'level2/bg.png',
+		h : height,
+		onload : function () {
+			this.x = i * this.w;
+		}
+	}); 
+	oldB3 = game.newImageObject({
+		file : 'level3/bg1.png',
+		h : height,
+		onload : function () {
+			this.x = i * this.w;
+		}
+	}); 
+	oldB4 = game.newImageObject({
+		file : 'level4/bg1.png',
+		h : height,
+		onload : function () {
+			this.x = i * this.w;
+		}
+	}); 
+	bg1.push(oldB1);
+	bg2.push(oldB2);
+	bg3.push(oldB3);
+	bg4.push(oldB4);
+});
+
+var drawBG = function () {
+	if (level == 1) {
+		OOP.forArr(bg1, function (el) {
+			el.draw();
+			el.move(p(-1, 0));
+			if (el.x + el.w < 0) {
+				el.x = oldB1.x + oldB1.w - 3;
+				oldB1 = el;
+			}
+		});
+	}
+	else if (level == 2) {
+		OOP.forArr(bg2, function (el) {
+			el.draw();
+			el.move(p(-1, 0));
+			if (el.x + el.w < 0) {
+				el.x = oldB2.x + oldB2.w - 3;
+				oldB2 = el;
+			}
+		});
+	}
+	else if (level == 3) {
+		OOP.forArr(bg3, function (el) {
+			el.draw();
+			el.move(p(-1, 0));
+			if (el.x + el.w < 0) {
+				el.x = oldB3.x + oldB3.w - 3;
+				oldB3 = el;
+			}
+		});
+	}
+	else if (level == 4) {
+		OOP.forArr(bg4, function (el) {
+			el.draw();
+			el.move(p(-1, 0));
+			if (el.x + el.w < 0) {
+				el.x = oldB4.x + oldB4.w - 3;
+				oldB4 = el;
+			}
+		});
+	}
+};
+
+var gr1 = [], gr2 = [], oldG1, oldG2;
+OOP.forInt(25, function (i) {
+	oldG1 = game.newImageObject({
+		file : 'level1/grr.png',
+		w : width / 20,
+		onload : function () {
+			this.x = i * this.w;
+			this.y = -this.h + height;
+		}
+	});
+	oldG2 = game.newImageObject({
+		file : 'level4/gr.png',
+		w : width / 20,
+		onload : function () {
+			this.x = i * this.w;
+			this.y = -this.h + height;
+		}
+	});
+	gr1.push(oldG1);
+	gr2.push(oldG2);
+});
+
+var drawGR = function () {
+	if (level == 1 || level == 2 || level == 3) {
+		OOP.forArr(gr1, function (el) {
+			el.draw();
+			el.move(p(-1.5, 0));
+			if (el.x + el.w < 0) {
+				el.x = oldG1.x + oldG1.w - 3;
+				oldG1 = el;
+			}
+
+		});
+	}
+	else if (level == 4) {
+		OOP.forArr(gr2, function (el) {
+			el.draw();
+			el.move(p(-1.5, 0));
+			if (el.x + el.w < 0) {
+				el.x = oldG2.x + oldG2.w - 3;
+				oldG2 = el;
+			}
+
+		});
+	}
+};
+
+var bird = game.newAnimationObject({
+	w : 397, h : 744,
+	positionC : p(400, 350),
+	scale : 0.2,
+	animation : pjs.tiles.newAnimation('heros.png', 397, 744, 4),
+	delay : 16,
+	userData : {
+		dy : 0
+	}
+});
+
+
+bird.setBox({
+	offset : p(25, 85),
+	size : s(-55, -95)
+});
+
+var Main = function () {
+	this.update = function () {
+		mainp.draw();
+		start.draw();
+
+		if (mouse.isPeekObject('LEFT', start)) {
+			return game.setLoop('menu');
+		}
+	};
+};
+var Menu = function () {
+	this.update = function () {
+		drawBG();
+		drawGR();
+		one.draw();
+		
+		nextt2.draw();
+		nextt.draw();
+		if (mouse.isPeekObject('LEFT', nextt)) {
+			return game.setLoop('game');
+		}
+	};
+};
+	
+var Menu2 = function () {
+	this.update = function () {
+		drawBG();
+		drawGR();
+		
+		
+		two.draw();
+		
+		nextt2.draw();
+		nextt.draw();
+
+		if (mouse.isPeekObject('LEFT', nextt)) {
+			return game.setLoop('game');
+		}
+	};
+};
+	
+var Menu3 = function () {
+	this.update = function () {
+		drawBG();
+		drawGR();
+		
+		three.draw();
+		
+		nextt2.draw();
+		nextt.draw();
+
+		if (mouse.isPeekObject('LEFT', nextt)) {
+			return game.setLoop('game');
+		}
+	};
+};
+	
+var Menu4 = function () {
+	this.update = function () {
+		drawBG();
+		drawGR();
+		
+		four.draw();
+		nextt2.draw();
+		nextt.draw();
+
+		if (mouse.isPeekObject('LEFT', nextt)) {
+			return game.setLoop('game');
+		}
+	};
+};
+	
+var Last = function () {
+	this.update = function () {
+		drawBG();
+		drawGR();
+		
+		last.draw();
+		repost.draw();
+		repost2.draw();
+		var rand1 = Math.floor(Math.random() * words.length);
+		var rand2 = Math.floor(Math.random() * photos.length);
+		
+		if (mouse.isPeekObject('LEFT', repost)) {
+			VK.api('wall.post', {
+				'owner_id' : '232305386',
+				'message' : words[rand1] + '\n\nПрисоединяйся к поздравлениям в https://vk.com/app7197517!',
+				'attachments' : photos[rand2]
+
+			}, function (data) {
+				log('Success');
+			});
+		}
+		if (mouse.isPeekObject('LEFT', repost2)) {
+			VK.api('wall.post', {
+				'owner_id' : '232305386',
+				'message' : words[rand1] + '\n\nПрисоединяйся к поздравлениям в https://vk.com/app7197517!',
+				'attachments' : photos[rand2]
+
+			}, function (data) {
+				log('Success');
+			});
+		}
+	};
+};
+
+var Game = function () {
+
+	var blocks = [], oldBlock = false;
+	var buses = [], oldBus = false;
+	var space = 80;
+
+	var addBlock = function (y) {
+
+		var dX = oldBlock ? oldBlock.top.x + pjs.math.random(200, 900) : width;
+
+		if (level == 1) {
+			var o = game.newImageObject({
+				file : 'level1/block3.png',
+				x : dX, y : 0,
+				w : width / 10,
+				onload : function () {
+					this.y = -this.h + y - space;
+				}
+			});
+
+			var o2 = game.newImageObject({
+				file : 'level1/block1.png',
+				x : dX, y : 0,
+				w : width / 10,
+				onload : function () {
+					this.y = y + space;
+				}
+			});
+		}
+		
+		else if (level == 2) {
+			var o = game.newImageObject({
+				file : 'level2/promh.png',
+				x : dX, y : 0,
+				w : width / 10,
+				onload : function () {
+					this.y = -this.h + y - space;
+				}
+			});
+
+			var o2 = game.newImageObject({
+				file : 'level2/prom.png',
+				x : dX, y : 0,
+				w : width / 10,
+				onload : function () {
+					this.y = y + space;
+				}
+			});
+		}
+		
+		else if (level == 3) {
+			var o = game.newImageObject({
+				file : 'level3/block3.png',
+				x : dX, y : 0,
+				w : width / 10,
+				onload : function () {
+					this.y = -this.h + y - space;
+				}
+			});
+
+			var o2 = game.newImageObject({
+				file : 'level3/block1.png',
+				x : dX, y : 0,
+				w : width / 10,
+				onload : function () {
+					this.y = y + space;
+				}
+			});
+		}
+		
+		else if (level == 4) {
+			var o = game.newImageObject({
+				file : 'level4/block1.png',
+				x : dX, y : 0,
+				angle : 180,
+				w : width / 10,
+				onload : function () {
+					this.y = -this.h + y - space;
+				}
+			});
+
+			var o2 = game.newImageObject({
+				file : 'level4/block1.png',
+				x : dX, y : 0,
+				w : width / 10,
+				onload : function () {
+					this.y = y + space;
+				}
+			});
+		}
+		
+		var obj = {
+			'top' : o,
+			'bottom' : o2
+		}
+
+		oldBlock = obj;
+		blocks.push(obj);
+	};
+	
+	var addBus = function () {
+
+		var dX = oldBus ? oldBus.bus.x + pjs.math.random(1000, 3000) : width;
+		if (level == 1) {
+			var b = game.newImageObject({
+				file : 'level1/bus.png',
+				x : dX, y : 0,
+				onload : function () {
+					this.y = 358;
+				}
+			});
+		}
+		else if (level == 2) {
+			var b = game.newImageObject({
+				file : 'level2/heli.png',
+				x : dX, y : 0,
+				scale : 0.05,
+				onload : function () {
+					this.y = 50;
+				}
+			});
+		}
+		else if (level == 3) {
+			var b = game.newImageObject({
+				file : 'level3/police.png',
+				x : dX, y : 0,
+				scale : 0.2,
+				onload : function () {
+					this.y = 375;
+				}
+			});
+		}
+		else if (level == 4) {
+			var b = game.newImageObject({
+				file : 'level4/bee.png',
+				x : dX, y : 0,
+				scale : 0.3,
+				onload : function () {
+					this.y = 340;
+				}
+			});
+		}
+
+		var obj = {
+			'bus' : b
+		}
+		
+		oldBus = obj;
+		buses.push(obj);
+	};
+	
+	var drawBuses = function () {
+		OOP.forArr(buses, function (el) {
+			el.bus.draw();
+
+			el.bus.move(p(-2, 0));
+
+			if (el.bus.x + el.bus.w < 0) {
+				el.bus.x = el.bus.x = oldBus.bus.x + oldBus.bus.w + pjs.math.random(1000, 3000);
+				oldBus = el;
+				
+			}
+
+		});
+	};
+
+	var drawBlocks = function () {
+		OOP.forArr(blocks, function (el) {
+			el.top.draw();
+			el.bottom.draw();
+
+			el.top.move(p(-1.5, 0));
+			el.bottom.move(p(-1.5, 0));
+
+			if (el.top.x + el.top.w < 0) {
+				el.top.x = el.bottom.x = oldBlock.top.x + oldBlock.top.w + pjs.math.random(200, 900);
+				oldBlock = el;
+				
+			}
+			
+			if (Math.abs(bird.x - el.top.x - el.top.w) < 0.7) {
+				score += 1;
+				if (score == 5) {
+					level +=1;
+					nextLevel();
+				}
+			}
+
+			if (el.top.isInCamera()) {
+				if (el.top.isIntersect(bird)) {
+					gameOver();
+				}
+			}
+
+			if (el.bottom.isInCamera()) {
+				if (el.bottom.isIntersect(bird)) {
+					gameOver();
+				}
+			}
+			
+
+			if (bird.y < -20) {
+				gameOver();
+			}
+
+			if (bird.y + bird.h > height) {
+				gameOver();
+			}
+
+		});
+	};
+
+	var gameOver = function () {
+		game.setLoop('GameOver');
+	};
+	
+	var nextLevel = function () {
+		game.setLoop('NextLevel');
+	};
+
+	this.update = function () {
+		drawBG();
+
+		bird.draw();
+		bird.dy += 0.5;
+		bird.y += bird.dy;
+		bird.angle = bird.dy;
+
+		if (mouse.isPress('LEFT')) {
+			bird.dy = -8;
+		}
+
+		drawBuses();
+		drawBlocks();
+
+		drawGR();
+
+		brush.drawText({
+			x : width / 2,
+			y : height / 20,
+			text : score,
+			size : 50,
+			color : 'white',
+			font : 'myFont',
+			align : 'center'
+		});
+
+	};
+
+	this.entry = function () {
+
+		bird.dy = 0;
+
+		blocks = [], oldBlock = false;
+		buses = [], oldBus = false
+
+		if (level == 1 || level == 3 || level == 4) {
+			OOP.forInt(5, function () {
+				addBlock(pjs.math.random(2.8 * space, height-space * 3));
+				addBus();
+			});
+		}
+		else {
+			OOP.forInt(5, function () {
+				addBlock(pjs.math.random(2.8 * space, height-space * 2.6));
+				addBus();
+			});
+		}
+
+		bird.setPositionC(p(width / 2, height / 2));
+		score = 0;
+	};
+};
+
+game.newLoopFromClassObject('main', new Main());
+game.newLoopFromClassObject('menu', new Menu());
+game.newLoopFromClassObject('menu2', new Menu2());
+game.newLoopFromClassObject('menu3', new Menu3());
+game.newLoopFromClassObject('menu4', new Menu4());
+game.newLoopFromClassObject('last', new Last());
+game.newLoopFromClassObject('game', new Game());
+
+var restart = game.newTextObject({
+	text : 'Рестарт!',
+	positionC : p(width/2, height/3),
+	font : 'Segoe',
+	size : 30,
+	color : '#FFFFFF'
+});
+
+game.newLoop('GameOver', function () {
+	game.clear();
+	drawBG();
+	drawGR();
+
+	brush.drawText({
+		x : width / 2,
+		y : height / 20,
+		text : 'Попробуй еще раз!',
+		size : 50,
+		color : 'white',
+		font : 'Segoe',
+		align : 'center'
+	});
+	
+	brush.drawText({
+		x : width / 2 + 2,
+		y : height / 20 + 2,
+		text : 'Попробуй еще раз!',
+		size : 50,
+		color : 'black',
+		font : 'Segoe',
+		align : 'center'
+	});
+	
+	restart.draw();
+
+	if (mouse.isPeekObject('LEFT', restart)) {
+		game.setLoop('game');
+	}
+
+});
+
+game.newLoop('NextLevel', function () {
+	game.clear();
+	drawBG();
+	drawGR();
+
+	if (level == 2)
+		game.setLoop('menu2');
+	else if (level == 3)
+		game.setLoop('menu3');
+	else if (level == 4)
+		game.setLoop('menu4');
+	else if (level == 5)
+		game.setLoop('last');
+});
+
+game.startLoop('main');
+
+</script>
+</body>
+</html>
